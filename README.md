@@ -153,3 +153,77 @@ backend -> frontend
 4. Предоставить манифесты и скриншоты или вывод команды п.2.
 
 ### Ответ:
+
+1. Включаем Ingress-controller в MicroK8S:
+
+```
+sudo microk8s enable ingress
+```
+
+```
+sudo microk8s kubectl get pods -n ingress
+```
+
+<img src = "img/06.png" width = 100%>
+
+2. Создадим Ingress (ingress.yaml):
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: "nginx"
+  rules:
+  - host: dnd.example.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-frontend
+            port:
+              number: 80
+      - path: /api
+        pathType: Exact
+        backend:
+          service:
+            name: svc-backend
+            port:
+              number: 8080
+```
+
+```
+sudo kubectl apply -f ingress.yaml
+```
+
+```
+sudo kubectl get ingress
+```
+
+```
+sudo kubectl get svc -A
+```
+
+<img src = "img/07.png" width = 100%>
+
+3. Проверяем доступность с помощью curl и браузера:
+
+```
+curl dnd.example.ru
+```
+
+```
+curl dnd.example.ru/api
+```
+
+<img src = "img/08.png" width = 100%>
+
+<img src = "img/09.png" width = 100%>
+
+<img src = "img/10.png" width = 100%>
+
