@@ -11,6 +11,139 @@
 
 ### Ответ:
 
+1. Создаем Deployment приложения **frontend** (deployment-nginx.yaml):
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+```
+
+```
+sudo kubectl apply -f deployment-nginx.yaml
+```
+
+```
+sudo kubectl get pods
+```
+
+<img src = "img/01.png" width = 100%>
+
+2. Создаем Deployment приложения **backend** (deployment-mt.yaml):
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool
+        env:
+          - name: HTTP_PORT
+            value: "8080"
+        ports:
+        - containerPort: 8080
+        name: http-port
+```
+
+```
+sudo kubectl apply -f deployment-mt.yaml
+```
+
+```
+sudo kubectl get pods
+```
+
+<img src = "img/02.png" width = 100%>
+
+3. Создаем сервисы для приложений (service-nginx.yaml и service-mt.yaml): 
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+```
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-backend
+spec:
+  selector:
+    app: backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+```
+
+```
+sudo kubectl apply -f service-nginx.yaml
+```
+
+```
+sudo kubectl apply -f service-mt.yaml
+```
+
+```
+sudo kubectl get svc
+```
+
+<img src = "img/03.png" width = 100%>
+
+4. Проверяем доступность приложений, что они видят друг друга:
+
+```
+sudo kubectl exec -it    -- /bin/bash
+```
+
+```
+sudo kubectl exec -it    -- /bin/bash
+```
+frontend -> backend
+
+<img src = "img/04.png" width = 100%>
+
+backend -> frontend
+
+<img src = "img/05.png" width = 100%>
+
 ---
 ## Задание 2. Создать Ingress и обеспечить доступ к приложениям снаружи кластера
 
